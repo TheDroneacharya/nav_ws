@@ -1,0 +1,14 @@
+# Request / Goal
+geometry_msgs/PoseStamped goal_pose
+float32 max_velocity_x
+float32 max_velocity_y
+float32 max_velocity_z
+float32 max_yaw_rate
+---
+# Result
+bool success
+float64 elapsed_time    # seconds
+---
+# Feedback
+float64 distance_remaining              # meters
+float64 elapsed_time                    # seconds

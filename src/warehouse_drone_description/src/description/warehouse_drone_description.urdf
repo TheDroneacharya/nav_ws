@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<robot name="warehouse_drone" xmlns:xacro="https://ros.org/wiki/xacro">
+
+<!-- Define robot constraints -->
+<xacro:property name="base_width" value="0.45"/>
+<xacro:property name="base_length" value="0.45"/>
+<xacro:property name="base_height" value="0.17"/>
+
+<xacro:property name="laser_width" value="0.05"/>
+<xacro:property name="laser_length" value="0.05"/>
+<xacro:property name="laser_height" value="0.08"/>
+
+<xacro:property name="camera0_width" value="0.09"/>
+<xacro:property name="camera0_length" value="0.03"/>
+<xacro:property name="camera0_height" value="0.03"/>
+
+<!-- Robot Base -->
+<link name="base_link">
+  <visual>
+    <geometry>
+      <box size="${base_length} ${base_width} ${base_height}"/>
+    </geometry>
+    <material name="Cyan">
+      <color rgba="0 1.0 1.0 1.0"/>
+    </material>
+  </visual>
+</link>
+
+<!-- Robot footprint -->
+<link name="base_footprint"/>
+
+<joint name="base_joint" type="fixed">
+  <parent link="base_footprint"/>
+  <child link="base_link"/>
+  <origin xyz="0.0 0.0 ${(base_height)/2}" rpy="0 0 0"/>
+</joint>
+
+<!-- LiDAR sensor -->
+<link name="laser">
+  <visual>
+    <geometry>
+      <box size="${laser_length} ${laser_width} ${laser_height}"/>
+    </geometry>
+    <material name="Black">
+      <color rgba="0 0 0 1.0"/>
+    </material>
+  </visual>
+</link>
+
+<joint name="laser_joint" type="fixed">
+  <parent link="base_link"/>
+  <child link="laser"/>
+  <origin xyz="0.0 0.0 ${(base_height/2)+(laser_height/2)}" rpy="0 0 3.1416"/>	<!-- rplidar a1 is configured to be 180 degree yawed in ROS as compared to it's hardware front. -->
+</joint>
+
+<!-- Realsense -->
+<link name="camera0_link">
+  <visual>
+    <geometry>
+      <box size="${camera0_length} ${camera0_width} ${camera0_height}"/>
+    </geometry>
+    <material name="Black">
+      <color rgba="0 0 0 1.0"/>
+    </material>
+  </visual>
+</link>
+
+<joint name="camera0_joint" type="fixed">
+  <parent link="base_link"/>
+  <child link="camera0_link"/>
+  <origin xyz="0.07 0.0 ${(base_height/2)+(camera0_height/2)}" rpy="0 0 0"/>
+</joint>
+
+</robot>

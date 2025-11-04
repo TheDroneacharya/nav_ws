@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>warehouse_drone_bringup</name>
+  <version>0.0.0</version>
+  <description>A package to manage all the launches of every package involved in the warehouse drone project.</description>
+  <maintainer email="p.aryaabhir@gmail.com">Arya</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  
+  <exec_depend>ros2launch</exec_depend>
+  <exec_depend>warehouse_drone_description</exec_depend>
+  <exec_depend>mavros</exec_depend>
+  <exec_depend>nvblox_examples_bringup</exec_depend>
+  <exec_depend>foxglove_bridge</exec_depend>
+  <exec_depend>topic_tools</exec_depend>
+  <exec_depend>robot_pose_publisher_ros2</exec_depend>
+  <exec_depend>nav2_bringup</exec_depend>
+  <exec_depend>nav2_simple_commander</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
