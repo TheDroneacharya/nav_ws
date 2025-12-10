@@ -17,7 +17,7 @@
 #include <mavros_msgs/srv/set_mode.hpp>
 #include <mavros_msgs/srv/command_bool.hpp>
 
-#include <warehouse_drone_commander/action/go_to_pose.hpp>
+#include <warehouse_drone_interfaces/action/go_to_pose.hpp>
 
 using namespace std::placeholders;
 using namespace std::chrono_literals;

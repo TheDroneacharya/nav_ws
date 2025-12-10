@@ -1,0 +1,23 @@
+offboard_commander_node:
+  ros__parameters:
+    setpoint_frame_id: "base_link"
+    takeoff_height: 0.7
+    max_velocity_x: 0.0       # 0.5 m/s
+    max_velocity_y: 0.0       # 0.5 m/s
+    max_velocity_z: 0.0       # 0.5 m/s
+    max_yaw_rate: 0.0         # 0.5 rad/s
+    go_to_pose_timeout: 10.0
+
+    # RC parameters
+    rc_arming_channel_index: 6          # Channel 6 is the arming switch
+    rc_offboard_channel_index: 11       # Channel 11 is the offboard switch
+    rc_total_channels: 18               # Assuming 18 channels total
+    rc_arm_channel_threshold: 1300      # Threshold value for arming switch
+    rc_offboard_channel_threshold: 1500 # Threshold value for offboard switch
+
+go_to_pose_action_server_node:
+  ros__parameters:
+    goal_tolerance_xy: 0.20          # 10 cm
+    goal_tolerance_yaw: 0.10         # ~5.7 degrees
+    goal_tolerance_height: 0.10      # 10 cm
+    goal_confirmation_delay: 0.5
