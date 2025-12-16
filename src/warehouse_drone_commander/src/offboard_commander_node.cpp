@@ -686,7 +686,6 @@ private:
         }
     }
 
-    // TODO: Use action server for setpoint following
     void takeoff_hold_position(){
         // Hold the current position by setting the setpoint to current position
         if (pose_received_.load() && to_takeoff_.load() && !in_flight_.load()) {
@@ -709,7 +708,6 @@ private:
         // Wait for MAVROS state
     }
 
-    // TODO: Use action server for setpoint following
     void hold_position(){
         // Hold the current position by setting the setpoint to current position
         if (pose_received_.load()) {
