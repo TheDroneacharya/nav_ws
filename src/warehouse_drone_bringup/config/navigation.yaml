@@ -92,6 +92,116 @@ controller_server:
       plugin: "nav2_controller::SimpleGoalChecker"
       xy_goal_tolerance: 0.25
       yaw_goal_tolerance: 0.25
+    FollowPath:
+      plugin: "nav2_rotation_shim_controller::RotationShimController"
+      angular_dist_threshold: 0.1 # radians = approx. 5.73 degrees, default = 0.785
+      forward_sampling_distance: 0.5
+      rotate_to_heading_angular_vel: 0.1
+      max_angular_accel: 0.1
+      simulate_ahead_time: 1.0
+      primary_controller: "nav2_mppi_controller::MPPIController"
+      motion_model: "Omni"
+      time_steps: 56
+      model_dt: 0.05  # time steps * model_dt = prediction horizon (56 * 0.05 = 2.8s)
+      batch_size: 2000  # number of trajectories sampled each control cycle. 2000 @ 30Hz & 1000 @ 50Hz are good values.
+      vx_std: 0.2
+      vy_std: 0.2
+      wz_std: 0.2
+      vx_max: 1.0 # Forward velocity limit. Costmap minimum size = 1.5m/s * 2.8s = 4.2m on either side of robot
+      vy_max: 1.0 # Lateral velocity limit, keep this non-zero to allow strafing motions.
+      vx_min: -1.0  # Backward velocity limit, keep this non-zero to allow backwards motions.
+      wz_max: 0.1 # Yaw rate limit (angular velocity)
+      ax_max: 2.0 # Linear acceleration limit
+      ax_min: -2.0  # Linear deceleration limit
+      ay_max: 2.0 # Lateral acceleration limit
+      ay_min: -2.0  # Lateral deceleration limit
+      az_max: 0.1 # Angular acceleration limit
+      temperature: 0.3  # The closer this value to 0, the “more” we take in consideration controls with less cost. Selectiveness of the optimization.
+      gamma: 0.015 # no need to tune this, usually
+      iteration_count: 1
+      prune_distance: 2.8 # 1.5 default, Distance ahead of nearest point on path to robot to prune path to (m). This distance should be at least as great as the furthest distance of interest by a critic (i.e. for maximum velocity projection forward, threshold to consider).
+      enforce_path_inversion: false # Targetting SMAC planner which can produce feasible paths with reversals. Refer docs.
+      transform_tolerance: 0.1
+      visualize: false
+      publish_optimal_trajectory: true # Whether to publish the optimal trajectory (pose, velocity, timestamps of via points) computed by MPC for visualization, debugging, or injection by lower-level control systems and/or collision avoidance systems that need awarenes of future velocity commands and/or poses.
+      reset_period: 1.0 # (only in Humble)
+      regenerate_noises: false
+      TrajectoryVisualizer:
+        trajectory_step: 5
+        time_step: 3
+      TrajectoryValidator:
+        plugin: "mppi::DefaultOptimalTrajectoryValidator"
+        collision_lookahead_time: 2.0
+        consider_footprint: false
+      critics: ["ConstraintCritic", "ObstaclesCritic", "GoalCritic", "GoalAngleCritic", "PathAlignCritic", "PathFollowCritic", "PathAngleCritic", "PreferForwardCritic", "TwirlingCritic"]
+      ConstraintCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 4.0
+      GoalCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 5.0
+        threshold_to_consider: 2.8
+      GoalAngleCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 3.0
+        threshold_to_consider: 2.8
+      PreferForwardCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 5.0
+        threshold_to_consider: 2.8
+      ObstaclesCritic:
+        enabled: true
+        cost_power: 1
+        repulsion_weight: 0.9 # the tuning of this is proprtional to your inflation layer’s radius. Higher radii should correspond to reduced repulsion_weight due to the penalty formation (e.g. inflation_radius - min_dist_to_obstacle). If this penalty is too high, the robot will slow significantly when entering cost-space from non-cost space or jitter in narrow corridors.
+        critical_weight: 20.0
+        consider_footprint: False
+        collision_cost: 10000.0
+        collision_margin_distance: 0.1
+        near_goal_distance: 0.5
+        # inflation_radius: 0.8 # (only in Humble)
+        # cost_scaling_factor: 10.0 # (only in Humble)
+        inflation_radius: 1.0 # (only in Humble)
+        cost_scaling_factor: 2.0 # (only in Humble)
+      # CostCritic:
+      #   enabled: true
+      #   cost_power: 1
+      #   cost_weight: 3.81
+      #   critical_cost: 300.0
+      #   consider_footprint: true
+      #   collision_cost: 1000000.0
+      #   near_goal_distance: 1.0 # default = 0.50
+      #   trajectory_point_step: 2
+      PathAlignCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 14.0
+        max_path_occupancy_ratio: 0.05
+        trajectory_point_step: 3  # default = 4
+        threshold_to_consider: 2.8
+        offset_from_furthest: 33  # prediction_horizon_s * max_speed / path_resolution / 3.0 is a good baseline.
+        use_path_orientations: false  # If you want the robot to deviate and invert directions where the controller sees fit, keep as false. If your plans do not contain orientation information (e.g. navfn), keep as false.
+      PathFollowCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 5.0
+        offset_from_furthest: 6 # default = 6
+        threshold_to_consider: 2.8  # To be same as prediction horizon for a clean hand-off to goal critics.
+      PathAngleCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 2.0  # default = 2.2
+        offset_from_furthest: 4 # default = 20
+        threshold_to_consider: 2.8
+        max_angle_to_furthest: 1.0  # default = 0.785 radians (45 degrees)
+        mode: 0
+      TwirlingCritic:
+        enabled: true
+        twirling_cost_power: 1
+        twirling_cost_weight: 10.0
     # FollowPath:
     #   plugin: "nav2_rotation_shim_controller::RotationShimController"
     #   angular_dist_threshold: 0.3 # radians, default = 0.785
@@ -99,172 +209,62 @@ controller_server:
     #   rotate_to_heading_angular_vel: 1.8
     #   max_angular_accel: 3.2
     #   simulate_ahead_time: 1.0
-    #   primary_controller: "nav2_mppi_controller::MPPIController"
-    #   motion_model: "Omni"
-    #   time_steps: 56
-    #   model_dt: 0.05  # time steps * model_dt = prediction horizon (56 * 0.05 = 2.8s)
-    #   batch_size: 2000  # number of trajectories sampled each control cycle. 2000 @ 30Hz & 1000 @ 50Hz are good values.
-    #   vx_std: 0.2
-    #   vy_std: 0.2
-    #   wz_std: 0.2
-    #   vx_max: 1.5 # Forward velocity limit. Costmap minimum size = 1.5m/s * 2.8s = 4.2m on either side of robot
-    #   vy_max: 1.0 # Lateral velocity limit, keep this non-zero to allow strafing motions.
-    #   vx_min: -1.0  # Backward velocity limit, keep this non-zero to allow backwards motions.
-    #   wz_max: 1.9 # Yaw rate limit (angular velocity)
-    #   ax_max: 2.7 # Linear acceleration limit
-    #   ax_min: -2.7  # Linear deceleration limit
-    #   ay_max: 2.0 # Lateral acceleration limit
-    #   ay_min: -2.0  # Lateral deceleration limit
-    #   az_max: 3.2 # Angular acceleration limit
-    #   temperature: 0.3  # The closer this value to 0, the “more” we take in consideration controls with less cost. Selectiveness of the optimization.
-    #   gamma: 0.015 # no need to tune this, usually
-    #   iteration_count: 1
-    #   prune_distance: 1.7
-    #   enforce_path_inversion: false # Targetting SMAC planner which can produce feasible paths with reversals. Refer docs.
-    #   transform_tolerance: 0.1
-    #   visualize: false
-    #   publish_optimal_trajectory: true # Whether to publish the optimal trajectory (pose, velocity, timestamps of via points) computed by MPC for visualization, debugging, or injection by lower-level control systems and/or collision avoidance systems that need awarenes of future velocity commands and/or poses.
-    #   reset_period: 1.0 # (only in Humble)
-    #   regenerate_noises: false
-    #   TrajectoryVisualizer:
-    #     trajectory_step: 5
-    #     time_step: 3
-    #   TrajectoryValidator:
-    #     plugin: "mppi::DefaultOptimalTrajectoryValidator"
-    #     collision_lookahead_time: 2.0
-    #     consider_footprint: false
-    #   critics: ["ConstraintCritic", "ObstaclesCritic", "GoalCritic", "GoalAngleCritic", "PathAlignCritic", "PathFollowCritic", "PathAngleCritic", "PreferForwardCritic", "TwirlingCritic"]
-    #   ConstraintCritic:
-    #     enabled: true
-    #     cost_power: 1
-    #     cost_weight: 4.0
-    #   GoalCritic:
-    #     enabled: true
-    #     cost_power: 1
-    #     cost_weight: 5.0
-    #     threshold_to_consider: 1.4
-    #   GoalAngleCritic:
-    #     enabled: true
-    #     cost_power: 1
-    #     cost_weight: 3.0
-    #     threshold_to_consider: 0.5
-    #   PreferForwardCritic:
-    #     enabled: true
-    #     cost_power: 1
-    #     cost_weight: 5.0
-    #     threshold_to_consider: 0.5
-    #   ObstaclesCritic:
-    #     enabled: true
-    #     cost_power: 1
-    #     repulsion_weight: 0.9
-    #     critical_weight: 20.0
-    #     consider_footprint: False
-    #     collision_cost: 10000.0
-    #     collision_margin_distance: 0.1
-    #     near_goal_distance: 0.5
-    #     # inflation_radius: 0.8 # (only in Humble)
-    #     # cost_scaling_factor: 10.0 # (only in Humble)
-    #     inflation_radius: 1.0 # (only in Humble)
-    #     cost_scaling_factor: 2.0 # (only in Humble)
-    #   # CostCritic:
-    #   #   enabled: true
-    #   #   cost_power: 1
-    #   #   cost_weight: 3.81
-    #   #   critical_cost: 300.0
-    #   #   consider_footprint: true
-    #   #   collision_cost: 1000000.0
-    #   #   near_goal_distance: 1.0 # default = 0.50
-    #   #   trajectory_point_step: 2
-    #   PathAlignCritic:
-    #     enabled: true
-    #     cost_power: 1
-    #     cost_weight: 14.0
-    #     max_path_occupancy_ratio: 0.05
-    #     trajectory_point_step: 3  # default = 4
-    #     threshold_to_consider: 0.5
-    #     offset_from_furthest: 20
-    #     use_path_orientations: false  # If you want the robot to deviate and invert directions where the controller sees fit, keep as false. If your plans do not contain orientation information (e.g. navfn), keep as false.
-    #   PathFollowCritic:
-    #     enabled: true
-    #     cost_power: 1
-    #     cost_weight: 5.0
-    #     offset_from_furthest: 5 # default = 6
-    #     threshold_to_consider: 1.4  # To be same as prediction horizon for a clean hand-off to goal critics.
-    #   PathAngleCritic:
-    #     enabled: true
-    #     cost_power: 1
-    #     cost_weight: 2.0  # default = 2.2
-    #     offset_from_furthest: 4 # default = 20
-    #     threshold_to_consider: 0.5
-    #     max_angle_to_furthest: 1.0  # default = 0.785 radians (45 degrees)
-    #     mode: 0
-    #   TwirlingCritic:
-    #     enabled: true
-    #     twirling_cost_power: 1
-    #     twirling_cost_weight: 10.0
-    FollowPath:
-      plugin: "nav2_rotation_shim_controller::RotationShimController"
-      angular_dist_threshold: 0.3 # radians, default = 0.785
-      forward_sampling_distance: 0.5
-      rotate_to_heading_angular_vel: 1.8
-      max_angular_accel: 3.2
-      simulate_ahead_time: 1.0
-      primary_controller: "dwb_core::DWBLocalPlanner"
-      xy_goal_tolerance: 0.25
-      trans_stopped_velocity: 0.25
-      min_vel_x: 0.0
-      max_vel_x: 1.5
-      min_vel_y: 0.0
-      max_vel_y: 1.5
-      min_speed_theta: 0.0
-      max_vel_theta: 1.0
-      min_speed_xy: 0.0
-      max_speed_xy: 3.0
-      acc_lim_x: 2.7
-      acc_lim_y: 2.7
-      acc_lim_theta: 3.2
-      decel_lim_x: -2.7
-      decel_lim_y: -2.7
-      decel_lim_theta: -3.2
-      critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist", "ObstacleFootprint", "PreferForward", "Twirling"]
-      RotateToGoal:
-        slowing_factor: 5.0
-        lookahead_time: 1.0
-        scale: 1.0
-      Oscillation:
-        oscillation_reset_dist: 0.05
-        oscillation_reset_angle: 0.2
-        oscillation_reset_time: -1.0
-        x_only_threshold: 0.05
-        scale: 1.0
-      BaseObstacle:
-        sum_scores: false
-        scale: 1.0
-      GoalAlign:
-        forward_point_distance: 0.325
-        aggregation_type: "last"
-        scale: 1.0
-      PathAlign:
-        forward_point_distance: 0.325
-        aggregation_type: "last"
-        scale: 1.0
-      PathDist:
-        aggregation_type: "last"
-        scale: 1.0
-      GoalDist:
-        aggregation_type: "last"
-        scale: 1.0
-      ObstacleFootprint:
-        sum_scores: false
-        scale: 1.0
-      PreferForward:
-        penalty: 1.0
-        strafe_x: 0.1
-        strafe_theta: 0.2
-        theta_scale: 10.0
-        scale: 0.5
-      Twirling:
-        scale: 1.0
+    #   primary_controller: "dwb_core::DWBLocalPlanner"
+    #   xy_goal_tolerance: 0.25
+    #   trans_stopped_velocity: 0.25
+    #   min_vel_x: 0.0
+    #   max_vel_x: 1.0
+    #   min_vel_y: 0.0
+    #   max_vel_y: 1.0
+    #   min_speed_theta: 0.0
+    #   max_vel_theta: 0.1
+    #   min_speed_xy: 0.0
+    #   max_speed_xy: 3.0
+    #   acc_lim_x: 2.0
+    #   acc_lim_y: 2.0
+    #   acc_lim_theta: 0.1
+    #   decel_lim_x: -2.0
+    #   decel_lim_y: -2.0
+    #   decel_lim_theta: -0.1
+    #   critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist", "ObstacleFootprint", "PreferForward", "Twirling"]
+    #   RotateToGoal:
+    #     slowing_factor: 5.0
+    #     lookahead_time: 1.0
+    #     scale: 1.0
+    #   Oscillation:
+    #     oscillation_reset_dist: 0.05
+    #     oscillation_reset_angle: 0.2
+    #     oscillation_reset_time: -1.0
+    #     x_only_threshold: 0.05
+    #     scale: 1.0
+    #   BaseObstacle:
+    #     sum_scores: false
+    #     scale: 1.0
+    #   GoalAlign:
+    #     forward_point_distance: 0.325
+    #     aggregation_type: "last"
+    #     scale: 1.0
+    #   PathAlign:
+    #     forward_point_distance: 0.325
+    #     aggregation_type: "last"
+    #     scale: 1.0
+    #   PathDist:
+    #     aggregation_type: "last"
+    #     scale: 1.0
+    #   GoalDist:
+    #     aggregation_type: "last"
+    #     scale: 1.0
+    #   ObstacleFootprint:
+    #     sum_scores: false
+    #     scale: 1.0
+    #   PreferForward:
+    #     penalty: 1.0
+    #     strafe_x: 0.1
+    #     strafe_theta: 0.2
+    #     theta_scale: 10.0
+    #     scale: 0.5
+    #   Twirling:
+    #     scale: 1.0
 
 local_costmap:
   local_costmap:
@@ -455,12 +455,12 @@ velocity_smoother:
     smoothing_frequency: 20.0
     scale_velocities: false
     feedback: "OPEN_LOOP"
-    max_velocity: [3.0, 3.0, 1.0]
-    min_velocity: [-2.5, -3.0, -1.0]
+    max_velocity: [1.0, 1.0, 0.1]
+    min_velocity: [-1.0, -1.0, -0.1]
     deadband_velocity: [0.0, 0.0, 0.0]
     velocity_timeout: 0.75
-    max_accel: [2.7, 2.7, 3.2]
-    max_decel: [-2.7, -2.7, -3.2]
+    max_accel: [2.0, 2.0, 0.1]
+    max_decel: [-2.0, -2.0, -0.1]
     odom_topic: "odom"  # Only used if feedback is "CLOSED_LOOP"
     odom_duration: 0.1  # Only used if feedback is "CLOSED_LOOP"
     use_realtime_priority: false  # System changes required, refer to documentation

@@ -135,6 +135,10 @@ def generate_launch_description():
         }.items(),
 		condition=IfCondition(LaunchConfiguration('nav2'))
 	)
+	plan_publisher = IncludeLaunchDescription(
+		PathJoinSubstitution([FindPackageShare('plan_publisher'), 'launch', 'plan_publisher_launch.py']),
+		condition=IfCondition(LaunchConfiguration('nav2'))
+	)
 
 	return LaunchDescription([
 		DeclareLaunchArgument(name='foxglove', default_value='True', description='Flag to launch foxglove bridge node seperately'),
@@ -156,4 +160,5 @@ def generate_launch_description():
 		cmd_vel_enu_relay_node,
 		cmd_vel_relay_node,
 		inspection_demo_launch,
+		plan_publisher,
 	])
