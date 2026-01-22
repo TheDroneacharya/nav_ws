@@ -1,0 +1,19 @@
+# Goal
+geometry_msgs/Point takeoff_position  # Where to return (home position)
+float32 rtl_altitude                  # Safe altitude for return flight (m)
+---
+# Result
+bool success
+string message
+geometry_msgs/Point final_position
+float32 total_distance_traveled
+---
+# Feedback
+geometry_msgs/Point current_position
+float32 distance_to_home
+float32 percentage_complete
+uint8 rtl_state
+uint8 RTL_STATE_ASCENDING = 0
+uint8 RTL_STATE_FLYING_HOME = 1
+uint8 RTL_STATE_DESCENDING = 2
+uint8 RTL_STATE_LANDED = 3

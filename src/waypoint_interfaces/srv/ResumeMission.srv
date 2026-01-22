@@ -1,0 +1,13 @@
+# Resume Mission Service
+# Used to resume a paused mission after RTL or manual pause
+
+# Request
+bool resume                    # True to resume mission
+uint32 start_from_waypoint     # Optional: specific waypoint to resume from (0 = use last saved)
+string mission_id              # Mission ID to resume (empty = last active mission)
+---
+# Response
+bool success                   # True if mission resumed successfully
+uint32 resumed_from_waypoint   # Waypoint index mission resumed from
+uint32 remaining_waypoints     # Number of waypoints remaining
+string message                 # Status message

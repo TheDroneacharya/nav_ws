@@ -1,0 +1,9 @@
+rack_1:
+  wall_width: 2.0       # Meters (X axis)
+  wall_height: 2.0       # Meters (Y axis)
+  camera:
+    focal_length: 50.0   # mm
+    working_distance: 0.5 # Meters (Z axis target)
+    sensor_width: 36.0   # mm
+    sensor_height: 24.0  # mm
+    overlap: 0.1         # 10% Overlap

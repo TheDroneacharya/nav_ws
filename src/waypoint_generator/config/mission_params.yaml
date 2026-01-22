@@ -1,0 +1,42 @@
+# Mission Control Parameters
+# Configuration for RTL, battery monitoring, and wall distance integration
+
+waypoint_server:
+  ros__parameters:
+    # RTL (Return to Launch) Configuration
+    rtl:
+      # Battery threshold to trigger RTL (percentage)
+      battery_rtl_threshold: 20.0
+      # Critical battery level - emergency landing (percentage)
+      battery_critical_threshold: 10.0
+      # Safe RTL altitude (meters)
+      rtl_altitude: 2.0
+      # Enable automatic RTL on low battery
+      enable_auto_rtl: true
+      # Enable automatic mission resume after RTL
+      enable_auto_resume: true
+      # Minimum battery percentage required to resume mission
+      resume_battery_threshold: 50.0
+    
+    # Mission State Configuration
+    mission:
+      # Rate at which to publish mission state (Hz)
+      state_publish_rate: 1.0
+      # Enable wall distance offset corrections
+      enable_wall_offset: true
+      # Maximum wall offset correction to apply (meters)
+      max_wall_offset: 0.5
+    
+    # System Health Monitoring
+    health:
+      # Enable system health monitoring
+      enable_health_monitoring: true
+      # Timeout for health check (seconds) - RTL if no heartbeat
+      health_timeout: 5.0
+    
+    # Topics Configuration
+    topics:
+      battery_state: "/battery_state"
+      system_health: "/system_health"
+      wall_offset: "/wall_distance/offset"
+      mission_state: "/mission_state"

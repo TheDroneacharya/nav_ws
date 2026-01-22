@@ -1,0 +1,15 @@
+# Goal
+string rack_id             # Identifier for the rack configuration to load
+float32 wall_width         # Optional override: Width of the wall (m)
+float32 wall_height        # Optional override: Height of the wall (m)
+float32 working_distance   # Optional override: Distance from wall (m)
+---
+# Result
+bool success
+string message
+uint32 total_waypoints
+---
+# Feedback
+geometry_msgs/Point current_waypoint
+uint32 waypoint_index
+float32 percentage_complete

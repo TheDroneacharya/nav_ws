@@ -1,0 +1,50 @@
+# Wall Distance Controller Parameters
+# These parameters can be overridden via launch file or command line
+
+wall_distance_controller:
+  ros__parameters:
+    # Target distance from wall/rack (meters)
+    target_distance: 1.0
+    
+    # Acceptable deviation from target (meters)
+    # Controller won't correct if within this tolerance
+    distance_tolerance: 0.1
+    
+    # Maximum lateral correction per update cycle (meters)
+    # Limits sudden large corrections for safety
+    max_correction: 0.3
+    
+    # Moving average filter window size (number of samples)
+    # Larger = smoother but slower response
+    filter_window_size: 10
+    
+    # Control loop update rate (Hz)
+
+    #TODO: MAKE THIS EQUIVALENT TO CONTROL RATE 
+
+    update_rate: 10.0
+    
+    # Valid depth range (meters)
+    min_valid_distance: 0.1   # Ignore readings closer than this (sensor noise)
+    max_valid_distance: 10.0  # Ignore readings farther than this
+    
+    # Depth camera configuration
+    depth_image_topic: "/depth_camera/depth"
+    range_topic: "/depth_camera/range"
+    use_depth_image: true     # Set to false to use Range messages instead
+    
+    # Region of Interest for depth extraction (as fraction of image dimensions)
+    # Center of ROI
+    roi_center_x: 0.5         # Horizontal center (0.5 = middle of image)
+    roi_center_y: 0.5         # Vertical center (0.5 = middle of image)
+    # Size of ROI
+    roi_width: 0.3            # Width (0.3 = 30% of image width)
+    roi_height: 0.3           # Height (0.3 = 30% of image height)
+    
+    # Depth scale factor (for 16-bit depth images)
+    # Convert raw values to meters (e.g., 0.001 if depth is in mm)
+    depth_scale: 0.001
+    
+    # Proportional gain for control
+    # Higher = more aggressive correction
+    kp: 0.5
